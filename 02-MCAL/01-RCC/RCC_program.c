@@ -1,146 +1,144 @@
-//               بسم الله الرحمن الرحيم 
+/****************************************************************/
+/******* Author    : Mohamed Ayman              *****************/
+/******* Date      : 20 jun 2023                *****************/
+/******* Version   : 0.0.1                      *****************/
+/******* File Name : RCC_programe.c             *****************/
+/****************************************************************/
 
-
-
-
-/*    Author    : 3mo MOHAMED AYMAN ABDELAZIZ                          */
-
-
-/*                          LIB                  */
-
-
+/*****************************< LIB *****************************/
 #include "STD_TYPES.h"
 #include "BIT_MATH.h"
-
-
-
-/*                        INCLUDE                   */
-
-
+/*****************************< MCAL *****************************/
 #include "RCC_interface.h"
 #include "RCC_private.h"
 #include "RCC_config.h"
-
-void MRCC_voidInitSysClock(void)
+/*****************************< Function Implementations *****************************/
+Std_ReturnType MCAL_RCC_InitSysClock(void)
 {
-    /* Configurations for system clock */
-    #if RCC_CLOCK_TYPE==RCC_HSI
-        SET_BIT(RCC_CR,0);              /* Enable HSI */
-        while(!GET_BIT(RCC_CR,1));      /* Wait until it's stable */
-        RCC_CFGR=0x00000000;            /* Select HSI */
+    Std_ReturnType Local_FunctionStatus = E_NOT_OK;
 
-    #elif RCC_CLOCK_TYPE==RCC_HSE_CRYSTAL
-        SET_BIT(RCC_CR,16);             /* Enable HSE */
-        CLR_BIT(RCC_CR,18);             /* Disable bypass */
-        while(!GET_BIT(RCC_CR,17));     /* wait until it's stable */
-        RCC_CFGR=0x00000001;            /* select HSE */
-
-    #elif RCC_CLOCK_TYPE==RCC_HSE_RC
-        SET_BIT(RCC_CR,16);             /* Enable HSE */
-        SET_BIT(RCC_CR,18);             /* Disable bypass */
-        while(!GET_BIT(RCC_CR,17));     /* wait until it's stable */
-        RCC_CFGR=0x00000001;            /* select HSE */
-
-    #elif RCC_CLOCK_TYPE==RCC_PLL
-        CLR_BIT(RCC_CR,24);             /* Disable PLL for configurations*/
-
-        /* Select PLL as system clock  bit 1:0 = 0b10*/
-        SET_BIT(RCC_CFGR,1);        
-        CLR_BIT(RCC_CFGR,0);
+    #if RCC_SYSCLK == RCC_HSE
         
-        RCC_CR &= ~((0b1111)<<18);        /* Clear multiplication bits */
-        RCC_CR |= (RCC_PLL_MUL_VAL)<<18; /* Set multiplication value */
-
-        /* Configure PLL source clock*/
-        #if RCC_PLL_INPUT==RCC_PLL_HSE
-            SET_BIT(RCC_CR,16);         /* Enable HSE */
-            SET_BIT(RCC_CFGR,16);       /* Enable HSE as PLL source clock*/
-            CLR_BIT(RCC_CFGR,17);       /* No prescale*/
-
-
-
-
-
-
-        #elif RCC_PLL_INPUT==RCC_PLL_HSE_DIV_2
-            SET_BIT(RCC_CR,16);         /* Enable HSE */
-            SET_BIT(RCC_CFGR,16);       /*Enable HSE as PLL source clock*/    
-            SET_BIT(RCC_CFGR,17);       /*Divide by 2*/
-
-
-
-
-
-            
-        #elif RCC_PLL_INPUT==RCC_PLL_HSI_DIV_2
-            SET_BIT(RCC_CR,0);           /* Enable HSI */
-            CLR_BIT(RCC_CFGR,16);       /*Enable HSI as PLL source clock*/
-       
-       
-       
-       
-       
-       
+        /**< Enable the external clock to be the source for the system clock. */
+        #if RCC_CLK_BYPASS == RCC_RC_CLK_
+            SET_BIT(RCC_CR, RCC_CR_HSEBYP); /**< Choose RC as a SYSCLK */
+        #elif RCC_CLK_BYPASS == RCC_CRYSTAL_CLK_
+            CLR_BIT(RCC_CR, RCC_CR_HSEBYP); /**< Choose CRYSTAL as a SYSCLK */
         #else 
-            #error(" WRONG CLOCK (PLL)")
-        #endif       
+            #error "Wrong Choice !!"
+        #endif /**< RCC_CLK_BYPASS */
+
+        /**< Enable the High-Speed External clock. */
+        SET_BIT(RCC_CR, RCC_CR_HSEON);
+
+        /**< Wait until the High-Speed External clock is stable. */
+        while(!GET_BIT(RCC_CR, RCC_CR_HSERDY));
+
+        /**< Select High-Speed External clock as the system clock source. */
+        RCC_CFGR = 0x00000001;
+
+        Local_FunctionStatus = E_OK;
+
+    #elif RCC_SYSCLK == RCC_HSI
         
-        SET_BIT(RC_CR,24);              /* Enable PLL */
-        while(!(GET_BIT(RCC_CR,25)));   /* Wait until stable */
+        /**< Enable the High-Speed Internal clock. */
+        SET_BIT(RCC_CR, RCC_CR_HSION);
+
+        /**< Wait until the High-Speed Internal clock is stable. */
+        while(!GET_BIT(RCC_CR, RCC_CR_HSIRDY));
+
+        /**< Select High-Speed Internal clock as the system clock source. */
+        RCC_CFGR = 0x00000000;
+
+        Local_FunctionStatus = E_OK;
+
+    #elif RCC_SYSCLK == RCC_PLL
+
+    // Placeholder for PLL configuration
+
+        /**< Enable the High-Speed Internal clock. */
+        SET_BIT(RCC_CR, RCC_CR_PLLON);
+
+        /**< Wait until the High-Speed Internal clock is stable. */
+        while(!GET_BIT(RCC_CR, RCC_CR_PLLRDY));
+
+        /**< Select High-Speed Internal clock as the system clock source. */
+        RCC_CFGR = 0x00000010;
+
+        Local_FunctionStatus = E_OK;
+
+
+
     #else
-        #error(" WRONG CLOCK TYPE ")
-    #endif
-    /*    Configurations for bus ( prescalers ) */
-    RCC_CFGR |= (RCC_AHB_PRESCALE<<4);
-    RCC_CFGR |= (RCC_APB1_PRESCALE<<8);
-    RCC_CFGR |= (RCC_APB2_PRESCALE<<11);
-    
-    #if RCC_CLOCK_SECURITY_SYSTEM==RCC_CSS_DISABLE
-        CLR_BIT(RCC_CR,19);
-    #elif RCC_CLOCK_SECURITY_SYSTEM==RCC_CSS_ENABLE
-        SET_BIT(RCC_CR,19);
-    #endif
+        #error "Wrong Choice !!"
+
+    #endif /**< RCC_SYSCLK */
+
+    return Local_FunctionStatus;
 }
 
-void MRCC_voidEnableClock(u8 copy_u8BusId, u8 copy_u8PerId)
+Std_ReturnType MCAL_RCC_EnablePeripheral(u8 Copy_BusId, u8 Copy_PeripheralId)
 {
-    if(copy_u8PerId <= 31)
+    Std_ReturnType Local_FunctionStatus = E_NOT_OK;
+
+    switch(Copy_BusId)
     {
-        switch (copy_u8BusId)
-        {
-            case RCC_AHB:  SET_BIT(RCC_AHBENR,copy_u8PerId); break;
-            case RCC_APB1: SET_BIT(RCC_APB1ENR,copy_u8PerId); break;
-            case RCC_APB2: SET_BIT(RCC_APB2ENR,copy_u8PerId); break;
-        }
+        /**< Enable the peripheral on the AHB bus. */
+        case RCC_AHB:
+            SET_BIT(RCC_AHBENR, Copy_PeripheralId);
+            Local_FunctionStatus = E_OK;
+            break;
+
+        /**< Enable the peripheral on the APB1 bus. */
+        case RCC_APB1:
+            SET_BIT(RCC_APB1ENR, Copy_PeripheralId);
+            Local_FunctionStatus = E_OK;
+            break;
+
+        /**< Enable the peripheral on the APB2 bus. */
+        case RCC_APB2:
+            SET_BIT(RCC_APB2ENR, Copy_PeripheralId);
+            Local_FunctionStatus = E_OK;
+            break;
+
+        default:
+            Local_FunctionStatus = E_NOT_OK;
+            break;
     }
-    else 
-    {
-        /* Return Error */
-    }
+
+    return Local_FunctionStatus;
 }
 
-
-
-
-
-
-
-
-void MRCC_voidDisabeClock(u8 copy_u8BusId, u8 copy_u8PerId)
+Std_ReturnType MCAL_RCC_DisablePeripheral(u8 Copy_BusId, u8 Copy_PeripheralId)
 {
-    if(copy_u8PerId <= 31)
+    Std_ReturnType Local_FunctionStatus = E_NOT_OK;
+
+    switch(Copy_BusId)
     {
-        switch (copy_u8BusId)
-        {
-            case RCC_AHB:  CLR_BIT(RCC_AHBENR,copy_u8PerId); break;
-            case RCC_APB1: CLR_BIT(RCC_APB1ENR,copy_u8PerId); break;
-            case RCC_APB2: CLR_BIT(RCC_APB2ENR,copy_u8PerId); break;
-        }
+        /**< Disable the peripheral on the AHB bus. */
+        case RCC_AHB:
+            CLR_BIT(RCC_AHBENR, Copy_PeripheralId);
+            Local_FunctionStatus = E_OK;
+            break;
+
+        /**< Disable the peripheral on the APB1 bus. */
+        case RCC_APB1:
+            CLR_BIT(RCC_APB1ENR, Copy_PeripheralId);
+            Local_FunctionStatus = E_OK;
+            break;
+
+        /**< Disable the peripheral on the APB2 bus. */
+        case RCC_APB2:
+            CLR_BIT(RCC_APB2ENR, Copy_PeripheralId);
+            Local_FunctionStatus = E_OK;
+            break;
+
+        default:
+            Local_FunctionStatus = E_NOT_OK;
+            break;
     }
-    else 
-    {
-        /* Return Error */
-    }
+
+    return Local_FunctionStatus;
 }
 
-//              الحمد لله 
+/*****************************< End of Function Implementations *****************************/
