@@ -1,87 +1,132 @@
-//               بسم الله الرحمن الرحيم 
+/****************************************************************/
+/******* Author    : Mohamed Ayman              *****************/
+/******* Date      : 20 jun 2023                *****************/
+/******* Version   : 0.0.1                      *****************/
+/******* File Name : RCC_private.h              *****************/
+/****************************************************************/
+#ifndef RCC_PRIVATE_H_
+#define RCC_PRIVATE_H_
+
+/**
+ * @defgroup RCC_Registers
+ * @brief Reset and Clock Control (RCC) Registers
+ *
+ * This module provides definitions for the RCC (Reset and Clock Control) registers
+ * for configuring and controlling system clocks and resets in the microcontroller.
+ *
+ * @{
+ */
+
+/**
+ * @brief RCC Control Register (CR)
+ *
+ * This register provides control over the main and PLL (Phase-Locked Loop) system clocks.
+ */
+#define RCC_CR                  (*((volatile u32 *)0x40021000))
+
+/**
+ * @brief RCC Configuration Register (CFGR)
+ *
+ * This register configures the system clock sources, prescalers, and peripherals clocks.
+ */
+#define RCC_CFGR                (*((volatile u32 *)0x40021004))
+
+/**
+ * @brief RCC Clock Interrupt Register (CIR)
+ *
+ * This register manages clock interrupts and flags.
+ */
+#define RCC_CIR                 (*((volatile u32 *)0x40021008))
+
+/**
+ * @brief RCC APB2 Peripheral Reset Register (APB2RSTR)
+ *
+ * This register controls the reset state of peripherals connected to APB2 bus.
+ */
+#define RCC_APB2RSTR            (*((volatile u32 *)0x4002100C))
+
+/**
+ * @brief RCC APB1 Peripheral Reset Register (APB1RSTR)
+ *
+ * This register controls the reset state of peripherals connected to APB1 bus.
+ */
+#define RCC_APB1RSTR            (*((volatile u32 *)0x40021010))
+
+/**
+ * @brief RCC AHB Peripheral Clock Enable Register (AHBENR)
+ *
+ * This register enables clock access for peripherals connected to AHB bus.
+ */
+#define RCC_AHBENR              (*((volatile u32 *)0x40021014))
+
+/**
+ * @brief RCC APB1 Peripheral Clock Enable Register (APB1ENR)
+ *
+ * This register enables clock access for peripherals connected to APB1 bus.
+ */
+#define RCC_APB1ENR             (*((volatile u32 *)0x4002101C))
+
+/**
+ * @brief RCC APB2 Peripheral Clock Enable Register (APB2ENR)
+ *
+ * This register enables clock access for peripherals connected to APB2 bus.
+ */
+#define RCC_APB2ENR             (*((volatile u32 *)0x40021018))
+
+/**
+ * @brief RCC Backup Domain Control Register (BDCR)
+ *
+ * This register provides control over backup domain and RTC (Real-Time Clock).
+ */
+#define RCC_BDCR                (*((volatile u32 *)0x40021020))
+
+/**
+ * @brief RCC Control and Status Register (CSR)
+ *
+ * This register provides various control and status flags.
+ */
+#define RCC_CSR                 (*((volatile u32 *)0x40021024))
+
+/** @} */ // end of RCC Control Register (CR)
+
+/**
+ * @defgroup RCC_CR_Bit_Definitions RCC Control Register (RCC_CR) Bit Definitions
+ * @{
+ */
+
+#define RCC_CR_HSION        0   /**< Internal High-Speed Clock Enable */
+#define RCC_CR_HSIRDY       1   /**< Internal High-Speed Clock Ready */
+#define RCC_CR_HSICAL       8   /**< Internal High-Speed Clock Calibration */
+#define RCC_CR_HSEON        16  /**< External High-Speed Clock Enable */
+#define RCC_CR_HSERDY       17  /**< External High-Speed Clock Ready */
+#define RCC_CR_HSEBYP       18  /**< External High-Speed Clock Bypass */
+#define RCC_CR_HSEPRE       19  /**< External High-Speed Clock Prescaler */
+#define RCC_CR_CSSON        24  /**< Clock Security System Enable */
+#define RCC_CR_PLLON        24  /**< PLL Enable */
+#define RCC_CR_PLLRDY       25  /**< PLL Ready */
+
+/** @} */ // end of RCC_CR_Bit_Definitions
+
+/**
+ * @defgroup RCC_Clock_Source RCC Clock Source Macros
+ * @{
+ */
+
+#define RCC_HSI             0   /**< High-Speed Internal Clock Source (HSI) */
+#define RCC_HSE             1   /**< High-Speed External Clock Source (HSE) */
+#define RCC_PLL             2   /**< Phase-Locked Loop Clock Source (PLL) */
+
+/** @} */ // end of RCC_Clock_Source
+
+/**
+ * @defgroup RCC_Clock_Type RCC Clock Type Macros
+ * @{
+ */
+
+#define RCC_CRYSTAL_CLK_    0   /**< Crystal Oscillator Clock Type */
+#define RCC_RC_CLK_         1   /**< RC Oscillator Clock Type */
+
+/** @} */ // end of RCC_Clock_Type
 
 
-
-
-/*    Author    : 3mo MOHAMED AYMAN ABDELAZIZ                          */
-
-
-/*                        INCLUDE                   */
-
-
-#ifndef RCC_PRIVATE_H
-#define RCC_PRIVATE_H
-
-#define RCC_BASE_ADDRESS    0x40021000 
-/* RCC registers */
-#define RCC_CR              (*((volatile u32*)(RCC_BASE_ADDRESS+0x000)))
-#define RCC_CFGR            (*((volatile u32*)(RCC_BASE_ADDRESS+0x004)))
-#define RCC_CIR             (*((volatile u32*)(RCC_BASE_ADDRESS+0x008)))
-#define RCC_APB2RSTR        (*((volatile u32*)(RCC_BASE_ADDRESS+0x00C)))
-#define RCC_APB1RSTR        (*((volatile u32*)(RCC_BASE_ADDRESS+0x010)))
-#define RCC_AHBENR          (*((volatile u32*)(RCC_BASE_ADDRESS+0x014)))
-#define RCC_APB2ENR         (*((volatile u32*)(RCC_BASE_ADDRESS+0x018)))
-#define RCC_APB1ENR         (*((volatile u32*)(RCC_BASE_ADDRESS+0x01C)))
-#define RCC_BDCR            (*((volatile u32*)(RCC_BASE_ADDRESS+0x020)))
-#define RCC_CSR             (*((volatile u32*)(RCC_BASE_ADDRESS+0x024)))
-#define RCC_AHBSTR          (*((volatile u32*)(RCC_BASE_ADDRESS+0x028)))
-#define RCC_CFGR2           (*((volatile u32*)(RCC_BASE_ADDRESS+0x02C)))
-
-/* RCC clock options */
-#define RCC_HSI             0
-#define RCC_HSE_CRYSTAL     1
-#define RCC_HSE_RC          2
-#define RCC_PLL             3
-
-/* CSS options */
-#define RCC_CSS_ENABLE      1
-#define RCC_CSS_DISABLE     0
-
-/* PLL clock source options*/
-#define RCC_PLL_HSI_DIV_2   0
-#define RCC_PLL_HSE         1
-#define RCC_PLL_HSE_DIV_2   2
-
-/* PLL multiply options */
-#define RCC_PLL_MUL_2       0b0000
-#define RCC_PLL_MUL_3       0b0001
-#define RCC_PLL_MUL_4       0b0010
-#define RCC_PLL_MUL_5       0b0011
-#define RCC_PLL_MUL_6       0b0100
-#define RCC_PLL_MUL_7       0b0101
-#define RCC_PLL_MUL_8       0b0110
-#define RCC_PLL_MUL_9       0b0111
-#define RCC_PLL_MUL_10      0b1000
-#define RCC_PLL_MUL_11      0b1001
-#define RCC_PLL_MUL_12      0b1010
-#define RCC_PLL_MUL_13      0b1011
-#define RCC_PLL_MUL_14      0b1100
-#define RCC_PLL_MUL_16      0b1101
-#define RCC_PLL_MUL_15      0b1110
-
-/* AHB prescale options */
-#define RCC_AHB_PRESCALE_0      0b0000
-#define RCC_AHB_PRESCALE_2      0b1000
-#define RCC_AHB_PRESCALE_4      0b1001
-#define RCC_AHB_PRESCALE_8      0b1010
-#define RCC_AHB_PRESCALE_16     0b1011
-#define RCC_AHB_PRESCALE_64     0b1100
-#define RCC_AHB_PRESCALE_128    0b1101 
-#define RCC_AHB_PRESCALE_256    0b1110
-#define RCC_AHB_PRESCALE_512    0b1111
-
-
-/*APB1 prescale options */
-#define RCC_APB1_PRESCALE_0     0b000
-#define RCC_APB1_PRESCALE_2     0b100
-#define RCC_APB1_PRESCALE_4     0b101
-#define RCC_APB1_PRESCALE_8     0b110
-#define RCC_APB1_PRESCALE_16    0b111
-
-/*APB2 prescale options */
-#define RCC_APB2_PRESCALE_0     0b000 
-#define RCC_APB2_PRESCALE_2     0b100
-#define RCC_APB2_PRESCALE_4     0b101
-#define RCC_APB2_PRESCALE_8     0b110
-#define RCC_APB2_PRESCALE_16    0b111
-#endif
+#endif /* RCC_PRIVATE_H_ */
